@@ -4,10 +4,9 @@ import { useState, useEffect, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { motion } from "motion/react";
 import { z } from "zod";
-import api from "@/services/api";
 import Image from "next/image";
-
 import "./change-password.css";
+import { api } from "@/lib/api";
 
 // Validação de senha usando Zod
 const passwordSchema = z

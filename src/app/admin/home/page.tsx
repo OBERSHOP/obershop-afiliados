@@ -16,6 +16,8 @@ import {
 } from '@/components/ui/select';
 import { Info } from 'lucide-react';
 import { useEffect, useState } from 'react';
+import { apiClient } from '@/lib/apiHandler';
+import { useAuthStore } from '@/store/authStore';
 import {
   Area,
   AreaChart,
@@ -86,31 +88,47 @@ const influencers: Influencer[] = [
 ];
 
 export default function AdminDashboardHome() {
-  const [days, setDays] = useState('30');
+  const [days, setDays] = useState('365');
   const [filter, setFilter] = useState('todos');
-  const [data, setData] = useState<ChartData[]>([]);
+  const [data] = useState<ChartData[]>([]);
+  const [overview, setOverview] = useState({
+    totalSalesCount: 0,
+    totalSalesValue: 0,
+    totalInfluencers: 0,
+  });
+
+  const [topSeller, setTopSeller] = useState<Influencer | null>(null);
+
+  const { sessionId } = useAuthStore();
 
   useEffect(() => {
-    const simulateFetch = () => {
-      const today = new Date();
-      const newData: ChartData[] = Array.from(
-        { length: Number(days) },
-        (_, i) => {
-          const d = new Date(today);
-          d.setDate(d.getDate() - i);
-          return {
-            date: d.toLocaleDateString('pt-BR'),
-            vendas: Math.floor(Math.random() * 1000),
-            comissoes: Math.floor(Math.random() * 400),
-            fretes: Math.floor(Math.random() * 200),
-          };
-        },
-      ).reverse();
-      setData(newData);
-    };
+    async function fetchDashboardData() {
+      try {
+        const response = await apiClient.get(`/sales?days=${days}`, {
+          headers: { 'Session-Id': sessionId },
+        });
 
-    simulateFetch();
-  }, [days]);
+        const data = response.data;
+
+        setOverview({
+          totalSalesCount: data.totalSells,
+          totalSalesValue: data.totalValues,
+          totalInfluencers: 0,
+        });
+
+        setTopSeller({
+          id: data.topSeller.influencer.id,
+          name: data.topSeller.influencer.fullName,
+          couponCode: data.topSeller.influencer.codeCoupon,
+          totalVendas: data.topSeller.totalSells,
+        });
+      } catch (error) {
+        console.error('Erro ao carregar dados do dashboard:', error);
+      }
+    }
+
+    fetchDashboardData();
+  }, [days, sessionId]);
 
   const CustomTooltip: React.FC<CustomTooltipProps> = ({
     active,
@@ -160,10 +178,11 @@ export default function AdminDashboardHome() {
               className="w-3 h-3 rounded-full"
               style={{ backgroundColor: payload[0].payload.color }}
             />
-            <span className="text-sm">{payload[0].name}</span>
+            <span className="text-sm">{payload?.[0]?.name}</span>
           </div>
           <span className="text-sm font-medium">
-            {payload[0].value} ({Math.round(payload[0].percent * 100)}%)
+            {payload?.[0]?.value} (
+            {Math.round((payload?.[0]?.percent ?? 0) * 100)}%)
           </span>
         </div>
       </div>
@@ -179,7 +198,7 @@ export default function AdminDashboardHome() {
             <CardTitle>Total de Vendas</CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="text-3xl font-semibold">128</p>
+            <p className="text-3xl font-semibold">{overview.totalSalesCount}</p>
           </CardContent>
         </Card>
 
@@ -203,7 +222,12 @@ export default function AdminDashboardHome() {
             </div>
           </CardHeader>
           <CardContent>
-            <p className="text-3xl font-semibold">R$ 35.492,75</p>
+            <p className="text-3xl font-semibold">
+              R${' '}
+              {(overview.totalSalesValue ?? 0).toLocaleString('pt-BR', {
+                minimumFractionDigits: 2,
+              })}
+            </p>
           </CardContent>
         </Card>
 
@@ -212,7 +236,9 @@ export default function AdminDashboardHome() {
             <CardTitle>Total de Influencers</CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="text-3xl font-semibold">42</p>
+            <p className="text-3xl font-semibold">
+              {overview.totalInfluencers}
+            </p>
           </CardContent>
         </Card>
       </div>
@@ -383,8 +409,9 @@ export default function AdminDashboardHome() {
                       layout="horizontal"
                       iconType="circle"
                       iconSize={10}
-                      formatter={(value, entry, index) => {
-                        const { payload } = entry;
+                      formatter={(value, entry) => {
+                        const payload =
+                          entry.payload as unknown as InfluencerStatus;
                         return (
                           <span
                             style={{ color: payload.color, marginLeft: '5px' }}
@@ -435,27 +462,31 @@ export default function AdminDashboardHome() {
 
           {/* Destaque do melhor influencer */}
           <div className="w-full lg:w-[35%] ">
-            <Card className="bg-sidebar-primary text-muted-foreground h-full">
+            <Card className="bg-sidebar-primary text-white h-full">
               <CardHeader>
                 <CardTitle className="text-lg">Campeão de Vendas</CardTitle>
               </CardHeader>
               <CardContent className="space-y-2 flex space-between">
                 <div>
-                  <p className="text-2xl font-bold">{influencers[0].name}</p>
+                  <p className="text-2xl font-bold">{topSeller?.name}</p>
                   <p>
                     Cupom:{' '}
                     <span className="font-semibold">
-                      {influencers[0].couponCode}
+                      {topSeller?.couponCode}
                     </span>
                   </p>
                   <p>
                     Total:{' '}
                     <span className="font-semibold">
-                      R$ {influencers[0].totalVendas.toLocaleString('pt-BR')}
+                      R$ {topSeller?.totalVendas?.toLocaleString('pt-BR')}
                     </span>
                   </p>
                 </div>
-                <Image src={Trophy} alt="OBER shop" className="w-24 mx-auto mb-3" />
+                <Image
+                  src={Trophy}
+                  alt="OBER shop"
+                  className="w-24 mx-auto mb-3"
+                />
               </CardContent>
             </Card>
           </div>

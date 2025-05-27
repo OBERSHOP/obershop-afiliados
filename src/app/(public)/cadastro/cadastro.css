@@ -1,4 +1,4 @@
-.cadastroMain{
+/* .cadastroMain{
     @apply
         flex 
         flex-col 
@@ -32,7 +32,6 @@
     items-center
 }
 
-/* Wizards */
 .cadastroMain__wizards{
     @apply
         flex
@@ -68,7 +67,6 @@
         text-white
 }
 
-/* check animation */
 .success-checkmark {
     width: 80px;
     height: 80px;
@@ -162,7 +160,6 @@
     background-color: #FFFFFF;
 }
 
-/* Animações */
 @keyframes rotate-circle {
     0% {
         transform: rotate(-45deg);
@@ -229,7 +226,6 @@
     }
 }
 
-/* Form */
 .cadastroMain__form{
     @apply
         flex
@@ -273,4 +269,4 @@
         py-3
         px-5
         rounded-lg
-}
+} */

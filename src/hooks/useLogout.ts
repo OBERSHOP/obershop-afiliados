@@ -1,6 +1,5 @@
 // hooks/useLogout.ts
 import { useAuthStore } from "@/store/authStore";
-import { useInfluencerStore } from "@/store/influencerStore";
 import { logout as apiLogout } from "@/services/authService";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";

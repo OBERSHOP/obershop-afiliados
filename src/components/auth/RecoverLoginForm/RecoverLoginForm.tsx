@@ -7,9 +7,9 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Mail } from 'lucide-react';
 import toast from 'react-hot-toast';
-import { Api } from '@/lib/apiHandler';
 import Link from 'next/link';
 import { useState, useEffect } from 'react';
+import { api } from '@/lib/api';
 
 const recoverSchema = z.object({
   email: z.string().email('E-mail inválido'),
@@ -44,7 +44,7 @@ export function RecoverLoginForm() {
 
     setIsSubmitting(true);
     try {
-      await Api.post('/auth/forget-password', data);
+      await api.post('/auth/forget-password', data);
       toast.success(
         'Se o e-mail estiver cadastrado, enviaremos o link para recuperação.',
       );

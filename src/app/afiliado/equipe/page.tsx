@@ -8,6 +8,8 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 import * as z from 'zod';
 import { toast } from 'sonner';
+import { apiClient } from '@/lib/apiHandler';
+
 import {
   Card,
   CardContent,
@@ -46,8 +48,16 @@ import {
   Tag,
 } from 'lucide-react';
 
-// Definição de tipos
-interface Influencer {
+const inviteSchema = z.object({
+  fullName: z.string().min(3, 'Nome completo é obrigatório'),
+  email: z.string().email('E-mail inválido'),
+  cpf: z.string().min(11, 'CPF inválido'),
+  cnpj: z.string().optional(),
+});
+
+type InviteFormValues = z.infer<typeof inviteSchema>;
+
+interface TeamMember {
   id: string;
   fullName: string;
   email: string;
@@ -57,9 +67,6 @@ interface Influencer {
   entryDate: string;
   leaderId: string | null;
   leaderName: string | null;
-}
-
-interface TeamMember extends Influencer {
   totalSales: number;
   totalCommission: number;
 }
@@ -70,22 +77,11 @@ interface TeamData {
   members: TeamMember[];
 }
 
-// Schema de validação para o convite
-const inviteSchema = z.object({
-  fullName: z.string().min(3, 'Nome completo é obrigatório'),
-  email: z.string().email('E-mail inválido'),
-  cpf: z.string().min(11, 'CPF inválido'),
-  cnpj: z.string().optional(),
-});
-
-type InviteFormValues = z.infer<typeof inviteSchema>;
-
 export default function EquipePage() {
   const { sessionId } = useAuthStore();
   const { influencer } = useInfluencerStore();
   const [isInviteModalOpen, setIsInviteModalOpen] = useState(false);
 
-  // Formulário de convite
   const inviteForm = useForm<InviteFormValues>({
     resolver: zodResolver(inviteSchema),
     defaultValues: {
@@ -96,7 +92,6 @@ export default function EquipePage() {
     },
   });
 
-  // Simulação de chamada à API para obter dados da equipe
   const {
     data: teamData,
     isLoading,
@@ -105,115 +100,35 @@ export default function EquipePage() {
   } = useQuery<TeamData>({
     queryKey: ['team-data', influencer?.id],
     queryFn: async () => {
-      // Em produção, substituir por chamada real à API
-      // const response = await Api.get("/team", {
-      //   params: { influencerId: influencer?.id },
-      //   headers: { "Session-Id": sessionId || "" },
-      // });
-      // return response.data;
-
-      // Dados mockados para exemplo
-      return {
-        leader: influencer?.leader
-          ? {
-              id: 'leader123',
-              fullName: 'João Silva',
-              email: 'joao.silva@exemplo.com',
-              phone: '(11) 98765-4321',
-              codeCoupon: 'JOAO10',
-              active: true,
-              entryDate: '2022-01-15',
-              leaderId: null,
-              leaderName: null,
-              totalSales: 45,
-              totalCommission: 4500.0,
-            }
-          : null,
-        currentUser: {
-          id: influencer?.id || 'user123',
-          fullName: influencer?.fullName || 'Maria Souza',
-          email: influencer?.email || 'maria.souza@exemplo.com',
-          phone: influencer?.phone || '(11) 91234-5678',
-          codeCoupon: influencer?.codeCoupon || 'MARIA15',
-          active: true,
-          entryDate: '2023-03-10',
-          leaderId: influencer?.leaderId || 'leader123',
-          leaderName: influencer?.leaderName || 'João Silva',
-          totalSales: 23,
-          totalCommission: 2100.5,
-        },
-        members: [
-          {
-            id: 'member1',
-            fullName: 'Pedro Oliveira',
-            email: 'pedro.oliveira@exemplo.com',
-            phone: '(11) 98888-7777',
-            codeCoupon: 'PEDRO20',
-            active: true,
-            entryDate: '2023-05-20',
-            leaderId: influencer?.id || 'user123',
-            leaderName: influencer?.fullName || 'Maria Souza',
-            totalSales: 12,
-            totalCommission: 980.75,
-          },
-          {
-            id: 'member2',
-            fullName: 'Ana Santos',
-            email: 'ana.santos@exemplo.com',
-            phone: '(11) 97777-6666',
-            codeCoupon: 'ANA25',
-            active: true,
-            entryDate: '2023-06-15',
-            leaderId: influencer?.id || 'user123',
-            leaderName: influencer?.fullName || 'Maria Souza',
-            totalSales: 8,
-            totalCommission: 650.3,
-          },
-          {
-            id: 'member3',
-            fullName: 'Carlos Ferreira',
-            email: 'carlos.ferreira@exemplo.com',
-            phone: '(11) 96666-5555',
-            codeCoupon: 'CARLOS30',
-            active: false,
-            entryDate: '2023-07-10',
-            leaderId: influencer?.id || 'user123',
-            leaderName: influencer?.fullName || 'Maria Souza',
-            totalSales: 0,
-            totalCommission: 0,
-          },
-        ],
-      };
+      const response = await apiClient.get('/team', {
+        params: { influencerId: influencer?.id },
+      });
+      return response.data;
     },
     enabled: !!sessionId && !!influencer?.id,
-    staleTime: 1000 * 60 * 5, // 5 minutos
+    staleTime: 1000 * 60 * 5,
   });
 
-  // Mutação para enviar convite
   const inviteMutation = useMutation({
     mutationFn: async (data: InviteFormValues) => {
       const payload = {
         ...data,
         leader: sessionId,
       };
-
-      const response = await Api.post('/influencer/pre-register', payload, {
+      const response = await apiClient.post('/influencer/pre-register', payload, {
         headers: {
           'Session-Id': sessionId || '',
-        },
+        },  
       });
-
       return response.data;
     },
-
     onSuccess: () => {
       toast.success('Convite enviado com sucesso!');
       setIsInviteModalOpen(false);
       inviteForm.reset();
       refetch();
     },
-    onError: (error) => {
-      console.error('Erro ao enviar convite:', error);
+    onError: () => {
       toast.error('Erro ao enviar convite. Tente novamente.');
     },
   });

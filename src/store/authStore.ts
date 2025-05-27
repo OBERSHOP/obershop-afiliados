@@ -1,10 +1,27 @@
-import { RolePrivileges } from "@/services/authService";
-import { create } from "zustand";
-import { persist, createJSONStorage } from "zustand/middleware";
-import { immer } from "zustand/middleware/immer";
+import { create } from 'zustand';
+import { persist, createJSONStorage } from 'zustand/middleware';
+import { immer } from 'zustand/middleware/immer';
 
 // Tipos mais específicos
 export type UserRole = 'ADMIN' | 'USER';
+
+export interface Privileges {
+  teamPrivilege?: {
+    teamCreate?: boolean;
+    teamEdit?: boolean;
+    teamView?: boolean;
+  };
+  paymentPrivilege?: {
+    paymentCreate?: boolean;
+    paymentEdit?: boolean;
+    paymentView?: boolean;
+  };
+  supportPrivilege?: {
+    supportCreate?: boolean;
+    supportEdit?: boolean;
+    supportView?: boolean;
+  };
+}
 
 export interface User {
   id?: string;
@@ -13,6 +30,7 @@ export interface User {
   roleAccess?: {
     id: string;
     name: string;
+    privileges?: Privileges;
   };
 }
 
@@ -39,31 +57,31 @@ export const useAuthStore = create<AuthState & AuthActions>()(
         sessionId: null,
         user: null,
         hasHydrated: false,
-        
+
         // Ações
-        setSessionId: (sessionId) => 
+        setSessionId: (sessionId) =>
           set((state) => {
             state.sessionId = sessionId;
           }),
-        
-        setUser: (user) => 
+
+        setUser: (user) =>
           set((state) => {
             state.user = user;
           }),
-        
-        clearSession: () => 
+
+        clearSession: () =>
           set((state) => {
             state.sessionId = null;
             state.user = null;
           }),
-        
-        setHasHydrated: (value) => 
+
+        setHasHydrated: (value) =>
           set((state) => {
             state.hasHydrated = value;
           }),
-        
+
         // Nova ação para atualizar campos específicos do usuário
-        updateUserField: (key, value) => 
+        updateUserField: (key, value) =>
           set((state) => {
             if (state.user) {
               state.user[key] = value;
@@ -71,23 +89,25 @@ export const useAuthStore = create<AuthState & AuthActions>()(
           }),
       }),
       {
-        name: "auth-storage",
+        name: 'auth-storage',
         storage: createJSONStorage(() => localStorage),
-        partialize: (state) => ({ 
-          sessionId: state.sessionId, 
-          user: state.user 
+        partialize: (state) => ({
+          sessionId: state.sessionId,
+          user: state.user,
         }), // Só persiste o que é necessário
         onRehydrateStorage: () => (state) => {
           state?.setHasHydrated(true);
         },
-      }
-    )
-  )
+      },
+    ),
+  ),
 );
 
 // Seletores otimizados para evitar re-renders desnecessários
 export const useAuthSession = () => useAuthStore((state) => state.sessionId);
 export const useAuthUser = () => useAuthStore((state) => state.user);
-export const useIsAdmin = () => useAuthStore((state) => state.user?.role === 'ADMIN');
-export const useIsAuthenticated = () => useAuthStore((state) => !!state.sessionId);
+export const useIsAdmin = () =>
+  useAuthStore((state) => state.user?.role === 'ADMIN');
+export const useIsAuthenticated = () =>
+  useAuthStore((state) => !!state.sessionId);
 export const useHasHydrated = () => useAuthStore((state) => state.hasHydrated);

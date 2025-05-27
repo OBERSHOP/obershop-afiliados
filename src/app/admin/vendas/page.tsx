@@ -3,7 +3,7 @@
 import { useState, useMemo } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { useAuthStore } from '@/store/authStore';
-import { Api } from '@/lib/apiHandler';
+
 import {
   Card,
   CardContent,
@@ -37,6 +37,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+import { api } from '@/lib/api';
 
 // Definição de tipos
 interface ProductItem {
@@ -96,7 +97,7 @@ export default function VendasPage() {
   } = useQuery<Sale[]>({
     queryKey: ['sales'],
     queryFn: async () => {
-      const response = await Api.get('/items-sales/sales', {
+      const response = await api.get('/items-sales/sales', {
         headers: {
           'Session-Id': sessionId || '',
         },
@@ -158,6 +159,7 @@ export default function VendasPage() {
       const date = new Date(dateString);
       return date.toLocaleDateString('pt-BR');
     } catch (error) {
+      console.log(error)
       return 'Data inválida';
     }
   };

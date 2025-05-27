@@ -3,11 +3,12 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { motion } from "motion/react";
-import api from "@/services/api";
+
 import { z } from "zod";
 import Image from "next/image";
 
 import "./cadastro.css";
+import { api } from "@/lib/api";
 
 const steps = [1, 2, 3];
 
@@ -21,7 +22,7 @@ const cnpjMask = (value: string) =>
   value
     .replace(/\D/g, "")
     .slice(0, 14)
-    .replace(/(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})/, "$1.$2.$3/$4-$5");
+    .replace(/(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})/, "$1.$2.$3/$4-$5");                                                                                                                                                                                                                                                     
 const phoneMask = (value: string) =>
   value
     .replace(/\D/g, "")

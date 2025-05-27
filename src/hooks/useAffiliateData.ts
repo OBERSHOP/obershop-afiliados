@@ -1,19 +1,19 @@
 'use client';
 
 import { useQuery } from '@tanstack/react-query';
-import { Api } from '@/lib/apiHandler';
 import { useAuthStore } from '@/store/authStore';
 import { useInfluencerStore } from '@/store/influencerStore';
+import { api } from '@/lib/api';
 
 export function useAffiliateData() {
   const sessionId = useAuthStore((s) => s.sessionId);
-  const influencerData = useInfluencerStore((s) => s.data);
-  const setInfluencerData = useInfluencerStore((s) => s.setData);
+const influencerData = useInfluencerStore((s) => s.influencer);
+const setInfluencerData = useInfluencerStore((s) => s.setInfluencer);
 
   return useQuery({
     queryKey: ['affiliate-data'],
     queryFn: async () => {
-      const response = await Api.get('/influencer', {
+      const response = await api.get('/influencer', {
         headers: {
           'Session-Id': sessionId || '',
         },

@@ -1,4 +1,4 @@
-"use client";
+'use client';
 
 import {
   Sidebar,
@@ -10,7 +10,7 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
   useSidebar,
-} from "@/components/ui/sidebar";
+} from '@/components/ui/sidebar';
 import {
   Home,
   HandCoins,
@@ -22,18 +22,20 @@ import {
   CreditCard,
   FileText,
   Settings,
-} from "lucide-react";
-import Image from "next/image";
-import Link from "next/link";
-import Logo from "@/../public/favicon.ico";
-import { usePathname } from "next/navigation";
-import { Button } from "@/components/ui/button";
-import { useLogout } from "@/hooks/useLogout";
+} from 'lucide-react';
+import Image from 'next/image';
+import Link from 'next/link';
+import Logo from '@/../public/favicon.ico';
+import { usePathname } from 'next/navigation';
+import { Button } from '@/components/ui/button';
+import { useLogout } from '@/hooks/useLogout';
+import { useAuthStore } from '@/store/authStore';
 
 export function AffiliateSidebar() {
   const { state, setOpenMobile } = useSidebar();
-  const collapsed = state === "collapsed";
+  const collapsed = state === 'collapsed';
   const handleLogout = useLogout();
+  const user = useAuthStore((state) => state.user);
 
   return (
     <Sidebar variant="sidebar" collapsible="icon" className="group/sidebar">
@@ -61,61 +63,14 @@ export function AffiliateSidebar() {
         <SidebarContent>
           <SidebarGroup>
             <SidebarMenu className="w-full py-4 gap-4">
-              <SidebarItem
-                icon={<Home size={20} />}
-                label="Início"
-                href="/afiliado/home"
-                collapsed={collapsed}
-              />
-
-              <SidebarItem
-                icon={<HandCoins size={20} />}
-                label="Vendas"
-                href="/afiliado/vendas"
-                collapsed={collapsed}
-              />
-
-              <SidebarItem
-                icon={<FileText size={20} />}
-                label="Extrato"
-                href="/afiliado/extrato"
-                collapsed={collapsed}
-              />
-
-              <SidebarItem
-                icon={<CreditCard size={20} />}
-                label="Pagamentos"
-                href="/afiliado/pagamentos"
-                collapsed={collapsed}
-              />
-
-              <SidebarItem
-                icon={<Users size={20} />}
-                label="Minha Equipe"
-                href="/afiliado/equipe"
-                collapsed={collapsed}
-              />
-
-              <SidebarItem
-                icon={<BarChart size={20} />}
-                label="Ranking"
-                href="/afiliado/ranking"
-                collapsed={collapsed}
-              />
-
-              <SidebarItem
-                icon={<Settings size={20} />}
-                label="Configurações"
-                href="/afiliado/config"
-                collapsed={collapsed}
-              />
-
-              <SidebarItem
-                icon={<Headset size={20} />}
-                label="Suporte"
-                href="/afiliado/suporte"
-                collapsed={collapsed}
-              />
+              <SidebarItem icon={<Home size={20} />} label="Início" href="/afiliado/home" collapsed={collapsed} />
+              <SidebarItem icon={<HandCoins size={20} />} label="Vendas" href="/afiliado/vendas" collapsed={collapsed} />
+              <SidebarItem icon={<FileText size={20} />} label="Extrato" href="/afiliado/extrato" collapsed={collapsed} />
+              <SidebarItem icon={<CreditCard size={20} />} label="Pagamentos" href="/afiliado/pagamentos" collapsed={collapsed} />
+              <SidebarItem icon={<Users size={20} />} label="Minha Equipe" href="/afiliado/equipe" collapsed={collapsed} />
+              <SidebarItem icon={<BarChart size={20} />} label="Ranking" href="/afiliado/ranking" collapsed={collapsed} />
+              <SidebarItem icon={<Settings size={20} />} label="Configurações" href="/afiliado/config" collapsed={collapsed} />
+              <SidebarItem icon={<Headset size={20} />} label="Suporte" href="/afiliado/suporte" collapsed={collapsed} />
             </SidebarMenu>
           </SidebarGroup>
         </SidebarContent>
@@ -127,15 +82,14 @@ export function AffiliateSidebar() {
               <div className="w-8 h-8 bg-muted rounded-full" />
               {!collapsed && (
                 <div>
-                  <div className="text-sm font-medium">Fulano da Silva</div>
-                  <div className="text-xs text-muted-foreground">CUPOM123</div>
+                  <div className="text-sm font-medium">{user?.fullName || 'Usuário'}</div>
+                  {/* <div className="text-xs text-muted-foreground">{user?.codeCoupon || '-'}</div> */}
                 </div>
               )}
             </div>
-
             <Button
               variant="destructive"
-              size={collapsed ? "icon" : "default"}
+              size={collapsed ? 'icon' : 'default'}
               className="w-full mt-2"
               onClick={handleLogout}
             >
@@ -170,8 +124,8 @@ function SidebarItem({
           href={href}
           className={`flex items-center gap-2 px-3 py-2.5 rounded-sm text-sm transition-colors ${
             isActive
-              ? "bg-accent text-accent-foreground font-medium"
-              : "hover:bg-muted"
+              ? 'bg-accent text-accent-foreground font-medium'
+              : 'hover:bg-muted'
           }`}
         >
           {icon}

@@ -5,17 +5,17 @@ import {
   UseQueryOptions,
   UseMutationOptions,
 } from '@tanstack/react-query';
-import { Api } from '@/lib/apiHandler';
 import { useAuthStore } from '@/store/authStore';
 import { useUiStore } from '@/store/uiStore';
 import { v4 as uuidv4 } from 'uuid';
+import { api } from '@/lib/api';
 
 // Hook genérico para fazer requisições GET com tratamento de loading
 export function useApiQuery<TData = unknown, TError = unknown>(
   endpoint: string,
   queryKey: unknown[],
   options?: UseQueryOptions<TData, TError, TData>,
-  params?: Record<string, any>,
+  params?: Record<string, string | number | boolean>,
 ) {
   const sessionId = useAuthStore((state) => state.sessionId);
   const { startApiRequest, finishApiRequest } = useUiStore();
@@ -26,7 +26,7 @@ export function useApiQuery<TData = unknown, TError = unknown>(
     queryFn: async () => {
       startApiRequest(requestId);
       try {
-        const response = await Api.get(endpoint, {
+        const response = await api.get(endpoint, {
           params,
           headers: sessionId ? { 'Session-Id': sessionId } : undefined,
         });
@@ -43,7 +43,7 @@ export function useApiQuery<TData = unknown, TError = unknown>(
 // Hook genérico para fazer mutações (POST, PUT, DELETE)
 export function useApiMutation<
   TData = unknown,
-  TVariables = unknown,
+  TVariables extends object = object,
   TError = unknown,
 >(
   endpoint: string,
@@ -60,7 +60,7 @@ export function useApiMutation<
       const requestId = `mutation_${endpoint}_${uuidv4()}`;
       startApiRequest(requestId);
       try {
-        const response = await Api[method](endpoint, variables, {
+        const response = await api[method](endpoint, variables, {
           headers: sessionId ? { 'Session-Id': sessionId } : undefined,
         });
         return response.data;
@@ -87,7 +87,7 @@ export function useApiMutation<
 export function usePrefetchQuery(
   queryKey: string,
   endpoint: string,
-  params?: Record<string, any>,
+  params?: Record<string, string | number | boolean>,
 ) {
   const queryClient = useQueryClient();
   const sessionId = useAuthStore((state) => state.sessionId);
@@ -98,7 +98,7 @@ export function usePrefetchQuery(
     await queryClient.prefetchQuery({
       queryKey: [queryKey],
       queryFn: async () => {
-        const response = await Api.get(endpoint, {
+        const response = await api.get(endpoint, {
           params,
           headers: { 'Session-Id': sessionId },
         });

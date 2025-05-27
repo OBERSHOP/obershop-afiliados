@@ -3,7 +3,6 @@
 import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { useAuthStore } from '@/store/authStore';
-import { Api } from '@/lib/apiHandler';
 import {
   Card,
   CardContent,
@@ -233,7 +232,7 @@ export default function RankingPage() {
   };
 
   return (
-    <div className="container mx-auto py-6 space-y-6">
+    <div className="container mx-auto py-6 space-y-6 w-[95%]">
       {/* Card de posição do usuário */}
       <Card className="bg-primary text-primary-foreground">
         <CardContent className="p-6">

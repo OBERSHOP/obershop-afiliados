@@ -3,7 +3,7 @@
 import { useState, useMemo } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { useAuthStore } from '@/store/authStore';
-import { useInfluencerStore } from '@/store/influencerStore';
+import { apiClient } from '@/lib/apiHandler'; // usa o interceptador Session-Id
 import {
   Card,
   CardContent,
@@ -48,7 +48,14 @@ import {
 } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
 
-// Definição de tipos
+interface ApiResponseItem {
+  id: string;
+  description: string;
+  value: number;
+  date: string;
+  influencerId: string;
+}
+
 interface WithdrawalRequest {
   id: string;
   amount: number;
@@ -68,125 +75,55 @@ interface WithdrawalRequest {
 
 export default function ExtratoPage() {
   const { sessionId } = useAuthStore();
-  const { influencer } = useInfluencerStore();
   const [selectedWithdrawal, setSelectedWithdrawal] =
     useState<WithdrawalRequest | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
-
-  // Parâmetros de paginação e filtro
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(10);
   const [orderBy, setOrderBy] = useState('requestDate+desc');
   const [statusFilter, setStatusFilter] = useState('all');
 
-  // Dados mockados para exemplo
-  const mockWithdrawals: WithdrawalRequest[] = [
-    {
-      id: 'w1',
-      amount: 1500.0,
-      requestDate: '2023-05-10',
-      paymentDate: '2023-05-15',
-      status: 'completed',
-      bankInfo: {
-        bankName: 'Banco do Brasil',
-        accountType: 'Corrente',
-        accountNumber: '12345-6',
-        branch: '1234',
-        holderName: 'João Silva',
-        document: '123.456.789-00',
-      },
-      notes: 'Pagamento processado com sucesso',
-    },
-    {
-      id: 'w2',
-      amount: 2300.5,
-      requestDate: '2023-05-20',
-      paymentDate: null,
-      status: 'pending',
-      bankInfo: {
-        bankName: 'Nubank',
-        accountType: 'Corrente',
-        accountNumber: '98765-4',
-        branch: '0001',
-        holderName: 'João Silva',
-        document: '123.456.789-00',
-      },
-      notes: null,
-    },
-    {
-      id: 'w3',
-      amount: 750.25,
-      requestDate: '2023-04-25',
-      paymentDate: '2023-05-02',
-      status: 'completed',
-      bankInfo: {
-        bankName: 'Itaú',
-        accountType: 'Poupança',
-        accountNumber: '87654-3',
-        branch: '4321',
-        holderName: 'João Silva',
-        document: '123.456.789-00',
-      },
-      notes: 'Pagamento processado com sucesso',
-    },
-    {
-      id: 'w4',
-      amount: 1200.0,
-      requestDate: '2023-05-25',
-      paymentDate: null,
-      status: 'processing',
-      bankInfo: {
-        bankName: 'Bradesco',
-        accountType: 'Corrente',
-        accountNumber: '54321-0',
-        branch: '0123',
-        holderName: 'João Silva',
-        document: '123.456.789-00',
-      },
-      notes: 'Em processamento pelo financeiro',
-    },
-    {
-      id: 'w5',
-      amount: 500.0,
-      requestDate: '2023-04-15',
-      paymentDate: null,
-      status: 'rejected',
-      bankInfo: {
-        bankName: 'Santander',
-        accountType: 'Corrente',
-        accountNumber: '65432-1',
-        branch: '3210',
-        holderName: 'João Silva',
-        document: '123.456.789-00',
-      },
-      notes: 'Dados bancários incorretos',
-    },
-  ];
-
-  // Simulação de chamada à API
   const {
-    data: withdrawals = mockWithdrawals,
+    data: withdrawals = [],
     isLoading,
     isError,
     refetch,
   } = useQuery<WithdrawalRequest[]>({
-    queryKey: ['withdrawals', influencer?.id],
+    queryKey: ['withdrawals'],
     queryFn: async () => {
-      // Em produção, substituir por chamada real à API
-      // const response = await Api.get("/withdrawals", {
-      //   params: { influencerId: influencer?.id },
-      //   headers: { "Session-Id": sessionId || "" },
-      // });
-      // return response.data;
-
-      // Retornando dados mockados
-      return mockWithdrawals;
+      const { data } = await apiClient.get<ApiResponseItem[]>(
+        '/payment/extract',
+        {
+          headers: {
+            'Session-Id': sessionId || '',
+          },
+        },
+      );
+      return data.map((item) => ({
+        id: item.id,
+        amount: item.value,
+        requestDate: item.date,
+        paymentDate: null,
+        status: item.description.toLowerCase().includes('concluído')
+          ? 'completed'
+          : item.description.toLowerCase().includes('rejeitado')
+          ? 'rejected'
+          : 'processing',
+        bankInfo: {
+          bankName: 'Desconhecido',
+          accountType: 'Desconhecido',
+          accountNumber: 'Desconhecido',
+          branch: 'Desconhecido',
+          holderName: 'Desconhecido',
+          document: 'Desconhecido',
+        },
+        notes: item.description,
+      }));
     },
-    enabled: !!sessionId && !!influencer?.id,
-    staleTime: 1000 * 60 * 5, // 5 minutos
+    enabled: !!sessionId,
+    staleTime: 5 * 60 * 1000,
   });
 
-  // Cálculos de resumo
   const summary = useMemo(() => {
     const totalGanho = withdrawals.reduce((acc, w) => acc + w.amount, 0);
     const saquesEfetuados = withdrawals
@@ -195,19 +132,15 @@ export default function ExtratoPage() {
     const emAnalise = withdrawals
       .filter((w) => w.status === 'pending' || w.status === 'processing')
       .reduce((acc, w) => acc + w.amount, 0);
-
     return { totalGanho, saquesEfetuados, emAnalise };
   }, [withdrawals]);
 
-  // Filtragem e paginação
   const { paginatedWithdrawals, totalPages } = useMemo(() => {
-    // Filtragem por status
     const filtered =
       statusFilter === 'all'
         ? withdrawals
         : withdrawals.filter((w) => w.status === statusFilter);
 
-    // Ordenação
     const [field, direction] = orderBy.split('+');
     const sorted = [...filtered].sort((a, b) => {
       if (field === 'requestDate') {
@@ -223,7 +156,6 @@ export default function ExtratoPage() {
       return 0;
     });
 
-    // Paginação
     const totalItems = sorted.length;
     const totalPages = Math.ceil(totalItems / itemsPerPage);
     const startIndex = (currentPage - 1) * itemsPerPage;
@@ -245,8 +177,7 @@ export default function ExtratoPage() {
     try {
       const date = new Date(dateString);
       return date.toLocaleDateString('pt-BR');
-    } catch (error) {
-      console.log(error)
+    } catch {
       return 'Data inválida';
     }
   };
@@ -297,7 +228,6 @@ export default function ExtratoPage() {
     }
   };
 
-  // Função para navegar entre páginas
   const handlePageChange = (newPage: number) => {
     if (newPage >= 1 && newPage <= totalPages) {
       setCurrentPage(newPage);

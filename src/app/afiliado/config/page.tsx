@@ -3,8 +3,8 @@
 import { useState } from 'react';
 import { useQuery, useMutation } from '@tanstack/react-query';
 import { useAuthStore } from '@/store/authStore';
-import { useInfluencerStore } from '@/store/influencerStore';
-import { Api } from '@/lib/apiHandler';
+import { Influencer, useInfluencerStore } from '@/store/influencerStore';
+
 import { z } from 'zod';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -41,6 +41,7 @@ import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { User, Settings, Key, Upload, Save } from 'lucide-react';
+import { api } from '@/lib/api';
 
 // Schemas de validação
 const personalDataSchema = z.object({
@@ -125,7 +126,7 @@ export default function ConfigPage() {
   const { isLoading, isError, refetch } = useQuery({
     queryKey: ['influencer-data'],
     queryFn: async () => {
-      const response = await Api.get(`/influencer/${influencer?.id}`, {
+      const response = await api.get(`/influencer/${influencer?.id}`, {
         headers: { 'Session-Id': sessionId || '' },
       });
 
@@ -156,7 +157,7 @@ export default function ConfigPage() {
   // Mutation para atualizar dados pessoais
   const updatePersonalDataMutation = useMutation({
     mutationFn: async (data: PersonalDataFormValues) => {
-      const response = await Api.put(
+      const response = await api.put(
         `/influencer`,
         {
           influencerId: influencer?.id,
@@ -183,7 +184,7 @@ export default function ConfigPage() {
   // Mutation para atualizar avatar
   const updateAvatarMutation = useMutation({
     mutationFn: async (avatarUrl: string) => {
-      const response = await Api.post(
+      const response = await api.post(
         `/influencer/avatar`,
         {
           influencerId: influencer?.id,
@@ -196,7 +197,10 @@ export default function ConfigPage() {
       return response.data;
     },
     onSuccess: (data) => {
-      setInfluencer({ ...influencer, profilePicture: data.profilePicture });
+      setInfluencer({
+        ...(influencer as Influencer),
+        profilePicture: data.profilePicture,
+      });
       toast.success('Avatar atualizado com sucesso!');
     },
     onError: () => {
@@ -207,7 +211,7 @@ export default function ConfigPage() {
   // Mutation para atualizar senha
   const updatePasswordMutation = useMutation({
     mutationFn: async (data: PasswordFormValues) => {
-      const response = await Api.post(
+      const response = await api.post(
         `/auth/change-password`,
         {
           email: influencer?.email,
@@ -547,11 +551,11 @@ export default function ConfigPage() {
                             <div
                               key={index}
                               className={`cursor-pointer rounded-md overflow-hidden border-2 transition-all ${
-                                selectedAvatar === avatar.src
+                                selectedAvatar === avatar.src.src
                                   ? 'border-primary ring-2 ring-primary/30'
                                   : 'border-transparent hover:border-muted-foreground/30'
                               }`}
-                              onClick={() => handleAvatarSelect(avatar.src)}
+                              onClick={() => handleAvatarSelect(avatar.src.src)}
                             >
                               <div className="h-16 w-16 relative">
                                 <Image

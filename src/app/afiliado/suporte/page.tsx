@@ -3,8 +3,6 @@
 import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { useAuthStore } from '@/store/authStore';
-import { useInfluencerStore } from '@/store/influencerStore';
-import { Api } from '@/lib/apiHandler';
 import {
   Card,
   CardContent,
@@ -28,7 +26,6 @@ import {
   FileText,
   Video,
   Calendar,
-  Download,
   Image as ImageIcon,
 } from 'lucide-react';
 import NextImage from 'next/image';
@@ -55,7 +52,6 @@ interface SupportItem {
 
 export default function SuportePage() {
   const { sessionId } = useAuthStore();
-  const { influencer } = useInfluencerStore();
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedItem, setSelectedItem] = useState<SupportItem | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -180,6 +176,7 @@ export default function SuportePage() {
       const date = new Date(dateString);
       return format(date, "dd 'de' MMMM 'de' yyyy", { locale: ptBR });
     } catch (error) {
+      console.log(error)
       return 'Data inválida';
     }
   };

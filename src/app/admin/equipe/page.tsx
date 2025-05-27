@@ -30,7 +30,7 @@ import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Search, ChevronLeft, ChevronRight, Plus, Send } from 'lucide-react';
 import { useAuthStore } from '@/store/authStore';
-import { Api } from '@/lib/apiHandler';
+
 import { useQuery, useMutation } from '@tanstack/react-query';
 import {
   Select,
@@ -51,6 +51,7 @@ import {
   FormMessage,
 } from '@/components/ui/form';
 import { toast } from 'sonner';
+import { api } from '@/lib/api';
 
 // Definição de tipos
 interface Influencer {
@@ -160,7 +161,7 @@ export default function EquipePage() {
       searchBy,
     ],
     queryFn: async () => {
-      const response = await Api.get('/influencer/paged', {
+      const response = await api.get('/influencer/paged', {
         headers: {
           'Session-Id': sessionId || '',
         },
@@ -211,7 +212,7 @@ export default function EquipePage() {
   // Mutação para enviar convite
   const inviteMutation = useMutation({
     mutationFn: async (data: InviteFormValues) => {
-      const response = await Api.post('/influencer/pre-register', data, {
+      const response = await api.post('/influencer/pre-register', data, {
         headers: {
           'Session-Id': sessionId || '',
         },
@@ -233,7 +234,7 @@ export default function EquipePage() {
   // Mutação para adicionar influencer
   const addInfluencerMutation = useMutation({
     mutationFn: async (data: AddInfluencerFormValues) => {
-      const response = await Api.post('/influencer', data, {
+      const response = await api.post('/influencer', data, {
         headers: {
           'Session-Id': sessionId || '',
         },

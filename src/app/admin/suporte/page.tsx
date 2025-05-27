@@ -98,7 +98,6 @@ export default function SuportePage() {
   const [isItemModalOpen, setIsItemModalOpen] = useState(false);
   const [isNewItemModalOpen, setIsNewItemModalOpen] = useState(false);
   const [isCategoryModalOpen, setIsCategoryModalOpen] = useState(false);
-  const [isDeleteAlertOpen, setIsDeleteAlertOpen] = useState(false);
   const [isEditMode, setIsEditMode] = useState(false);
 
   // Formulários
@@ -189,20 +188,19 @@ export default function SuportePage() {
   ];
 
   // Queries
-  const { data: categories = mockCategories, isLoading: isCategoriesLoading } =
-    useQuery<Category[]>({
-      queryKey: ['support-categories'],
-      queryFn: async () => {
-        // Em produção, substituir por chamada real à API
-        // const response = await Api.get("/support/categories", {
-        //   headers: { "Session-Id": sessionId || "" },
-        // });
-        // return response.data;
-        return mockCategories;
-      },
-      enabled: !!sessionId,
-      staleTime: 1000 * 60 * 5, // 5 minutos
-    });
+  const { data: categories = mockCategories } = useQuery<Category[]>({
+    queryKey: ['support-categories'],
+    queryFn: async () => {
+      // Em produção, substituir por chamada real à API
+      // const response = await Api.get("/support/categories", {
+      //   headers: { "Session-Id": sessionId || "" },
+      // });
+      // return response.data;
+      return mockCategories;
+    },
+    enabled: !!sessionId,
+    staleTime: 1000 * 60 * 5, // 5 minutos
+  });
 
   const {
     data: supportItems = mockSupportItems,
@@ -311,46 +309,6 @@ export default function SuportePage() {
         description: data.description || undefined,
       };
     },
-    onSuccess: (updatedItem) => {
-      queryClient.setQueryData<SupportItem[]>(
-        ['support-items'],
-        (old = []) =>
-          old?.map((item) =>
-            item.id === updatedItem.id ? updatedItem : item,
-          ) || [],
-      );
-      toast.success('Item atualizado com sucesso!');
-      setIsItemModalOpen(false);
-      setIsEditMode(false);
-      itemForm.reset();
-    },
-    onError: () => {
-      toast.error('Erro ao atualizar item. Tente novamente.');
-    },
-  });
-
-  const deleteItemMutation = useMutation({
-    mutationFn: async (id: string) => {
-      // Em produção, substituir por chamada real à API
-      // await Api.delete(`/support/items/${id}`, {
-      //   headers: { "Session-Id": sessionId || "" },
-      // });
-
-      // Mock para exemplo
-      return id;
-    },
-    onSuccess: (id) => {
-      queryClient.setQueryData<SupportItem[]>(['support-items'], (old = []) =>
-        old.filter((item) => item.id !== id),
-      );
-      toast.success('Item excluído com sucesso!');
-      setIsDeleteAlertOpen(false);
-      setIsItemModalOpen(false);
-      setSelectedItem(null);
-    },
-    onError: () => {
-      toast.error('Erro ao excluir item. Tente novamente.');
-    },
   });
 
   // Handlers
@@ -379,10 +337,6 @@ export default function SuportePage() {
     });
 
     setIsEditMode(true);
-  };
-
-  const handleDeleteClick = () => {
-    setIsDeleteAlertOpen(true);
   };
 
   const handleNewItemClick = () => {
@@ -432,17 +386,30 @@ export default function SuportePage() {
         locale: ptBR,
       });
     } catch (error) {
+      console.log(error);
       return dateString;
     }
   };
 
   // Função melhorada para verificar se a URL da imagem é válida
   const isValidImageUrl = (url?: string) => {
-    return url && url.trim() !== '' && !url.includes('undefined') && !url.includes('null');
+    return (
+      url &&
+      url.trim() !== '' &&
+      !url.includes('undefined') &&
+      !url.includes('null')
+    );
   };
 
   // Componente para renderizar imagem ou fallback
-  const ImageWithFallback = ({ src, alt, className = "h-full w-full" }: { src?: string, alt: string, className?: string }) => {
+  const ImageWithFallback = ({
+    src,
+    alt,
+  }: {
+    src?: string;
+    alt: string;
+    className?: string;
+  }) => {
     if (!isValidImageUrl(src)) {
       return (
         <div className="h-full w-full bg-muted flex items-center justify-center">
@@ -450,7 +417,7 @@ export default function SuportePage() {
         </div>
       );
     }
-    
+
     return (
       <div className="h-full w-full relative">
         <NextImage
@@ -595,7 +562,10 @@ export default function SuportePage() {
 
               <div className="space-y-4">
                 <div className="relative h-[250px] w-full rounded-md overflow-hidden">
-                  <ImageWithFallback src={selectedItem.urlImage} alt={selectedItem.name} />
+                  <ImageWithFallback
+                    src={selectedItem.urlImage}
+                    alt={selectedItem.name}
+                  />
                 </div>
 
                 <div className="flex justify-between items-center">
@@ -660,7 +630,7 @@ export default function SuportePage() {
                 </Button>
                 <Button
                   variant="destructive"
-                  onClick={handleDeleteClick}
+                  // onClick={handleDeleteClick}
                   className="gap-2"
                 >
                   <Trash2 className="h-4 w-4" />
@@ -775,7 +745,10 @@ export default function SuportePage() {
                           />
                         </FormControl>
                         <div className="mt-2 h-[120px] w-full rounded-md overflow-hidden border">
-                          <ImageWithFallback src={field.value} alt="Prévia da imagem" />
+                          <ImageWithFallback
+                            src={field.value}
+                            alt="Prévia da imagem"
+                          />
                         </div>
                         <FormMessage />
                       </FormItem>
@@ -977,7 +950,10 @@ export default function SuportePage() {
                       />
                     </FormControl>
                     <div className="mt-2 h-[120px] w-full rounded-md overflow-hidden border">
-                      <ImageWithFallback src={field.value} alt="Prévia da imagem" />
+                      <ImageWithFallback
+                        src={field.value}
+                        alt="Prévia da imagem"
+                      />
                     </div>
                     <FormMessage />
                   </FormItem>
@@ -1055,8 +1031,7 @@ export default function SuportePage() {
                 <Button
                   type="submit"
                   disabled={
-                    createItemMutation.isPending ||
-                    updateItemMutation.isPending
+                    createItemMutation.isPending || updateItemMutation.isPending
                   }
                 >
                   {isEditMode

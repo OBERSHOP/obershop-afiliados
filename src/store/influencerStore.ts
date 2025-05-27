@@ -1,17 +1,21 @@
 // /store/influencerStore.ts
-import { create } from "zustand";
-import { persist } from "zustand/middleware";
+import { create } from 'zustand';
+import { persist } from 'zustand/middleware';
 
-interface Influencer {
+export interface Influencer {
   id: string;
   fullName: string;
   email: string;
-  codeCoupon: string;
   phone: string;
-  entryDate: string;
-  leader: string;
-  active: boolean;
   profilePicture?: string;
+  cpf?: string;
+  cnpj?: string;
+  cep?: string;
+  state?: string;
+  city?: string;
+  neighborhood?: string;
+  streetAddress?: string;
+  numberAddress?: string;
 }
 
 interface InfluencerStore {
@@ -32,7 +36,7 @@ export const useInfluencerStore = create<InfluencerStore>()(
       clearInfluencer: () => set({ influencer: null }),
     }),
     {
-      name: "influencer-storage",
-    }
-  )
+      name: 'influencer-storage',
+    },
+  ),
 );

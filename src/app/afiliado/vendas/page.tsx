@@ -27,7 +27,6 @@ import {
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import {
-  HandCoins,
   ChevronLeft,
   ChevronRight,
   ShoppingBag,
@@ -80,7 +79,7 @@ export default function VendasPage() {
     return { totalVendas, totalValor, totalComissao };
   }, [sales]);
 
-  const { paginatedSales, totalItems, totalPages } = useMemo(() => {
+  const { paginatedSales, totalPages } = useMemo(() => {
     const [field, direction] = orderBy.split('+');
     const sorted = [...sales].sort((a, b) => {
       const dateA = new Date(a.dateSale).getTime();

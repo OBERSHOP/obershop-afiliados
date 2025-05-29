@@ -52,6 +52,7 @@ import {
 } from '@/components/ui/form';
 import { toast } from 'sonner';
 import { api } from '@/lib/api';
+import axios from 'axios';
 
 // Definição de tipos
 interface Influencer {
@@ -212,12 +213,32 @@ export default function EquipePage() {
   // Mutação para enviar convite
   const inviteMutation = useMutation({
     mutationFn: async (data: InviteFormValues) => {
-      const response = await api.post('/influencer/pre-register', data, {
-        headers: {
-          'Session-Id': sessionId || '',
-        },
-      });
-      return response.data;
+      try {
+        const response = await api.post('/influencer/pre-register', data, {
+          headers: {
+            'Session-Id': sessionId || '',
+          },
+        });
+        return response.data;
+      } catch (error) {
+        if (axios.isAxiosError(error)) {
+          if (error.response) {
+            // O servidor respondeu com um status de erro
+            console.error('Erro do servidor:', error.response.status, error.response.data);
+            throw new Error(`Erro do servidor: ${error.response.status} - ${JSON.stringify(error.response.data)}`);
+          } else if (error.request) {
+            // A requisição foi feita mas não houve resposta
+            console.error('Sem resposta do servidor:', error.request);
+            throw new Error('Não foi possível conectar ao servidor. Verifique sua conexão de internet.');
+          } else {
+            // Algo aconteceu na configuração da requisição
+            console.error('Erro na configuração da requisição:', error.message);
+            throw new Error(`Erro na requisição: ${error.message}`);
+          }
+        }
+        console.error('Erro desconhecido:', error);
+        throw error;
+      }
     },
     onSuccess: () => {
       toast.success('Convite enviado com sucesso!');
@@ -225,9 +246,10 @@ export default function EquipePage() {
       inviteForm.reset();
       refetch();
     },
-    onError: (error) => {
+    onError: (error: Error) => {
       console.error('Erro ao enviar convite:', error);
-      toast.error('Erro ao enviar convite. Tente novamente.');
+      const errorMessage = error?.message || 'Erro ao enviar convite. Tente novamente.';
+      toast.error(errorMessage);
     },
   });
 
@@ -337,7 +359,7 @@ export default function EquipePage() {
   }
 
   return (
-    <div className="container py-10 w-[95%] mx-auto">
+    <div className="container py-10 w-[95%] mx-auto bg-[]">
       <Card>
         <CardHeader className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
           <div>
@@ -966,3 +988,5 @@ export default function EquipePage() {
     </div>
   );
 }
+
+

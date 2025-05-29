@@ -14,8 +14,6 @@ import {
 import {
   Home,
   HandCoins,
-  Headset,
-  BarChart,
   Users,
   X,
   LogOut,
@@ -68,9 +66,9 @@ export function AffiliateSidebar() {
               <SidebarItem icon={<FileText size={20} />} label="Extrato" href="/afiliado/extrato" collapsed={collapsed} />
               <SidebarItem icon={<CreditCard size={20} />} label="Pagamentos" href="/afiliado/pagamentos" collapsed={collapsed} />
               <SidebarItem icon={<Users size={20} />} label="Minha Equipe" href="/afiliado/equipe" collapsed={collapsed} />
-              <SidebarItem icon={<BarChart size={20} />} label="Ranking" href="/afiliado/ranking" collapsed={collapsed} />
+              {/* <SidebarItem icon={<BarChart size={20} />} label="Ranking" href="/afiliado/ranking" collapsed={collapsed} /> */}
               <SidebarItem icon={<Settings size={20} />} label="Configurações" href="/afiliado/config" collapsed={collapsed} />
-              <SidebarItem icon={<Headset size={20} />} label="Suporte" href="/afiliado/suporte" collapsed={collapsed} />
+              {/* <SidebarItem icon={<Headset size={20} />} label="Suporte" href="/afiliado/suporte" collapsed={collapsed} /> */}
             </SidebarMenu>
           </SidebarGroup>
         </SidebarContent>

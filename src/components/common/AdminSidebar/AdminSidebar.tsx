@@ -1,4 +1,4 @@
-"use client";
+'use client';
 
 import {
   Sidebar,
@@ -10,7 +10,7 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
   useSidebar,
-} from "@/components/ui/sidebar";
+} from '@/components/ui/sidebar';
 import {
   Home,
   Landmark,
@@ -20,20 +20,23 @@ import {
   Users,
   X,
   LogOut,
-} from "lucide-react";
-import Image from "next/image";
-import Link from "next/link";
-import Logo from "@/../public/favicon.ico";
-import { usePathname } from "next/navigation";
-import { usePermission } from "@/hooks/usePermission";
-import { useLogout } from "@/hooks/useLogout";
-import { Button } from "@/components/ui/button";
+  Settings,
+} from 'lucide-react';
+import Image from 'next/image';
+import Link from 'next/link';
+import Logo from '@/../public/favicon.ico';
+import { usePathname } from 'next/navigation';
+import { usePermission } from '@/hooks/usePermission';
+import { useLogout } from '@/hooks/useLogout';
+import { Button } from '@/components/ui/button';
+import { useAuthStore } from '@/store/authStore';
 
 export function AdminSidebar() {
   const { state, setOpenMobile } = useSidebar();
-  const collapsed = state === "collapsed";
+  const collapsed = state === 'collapsed';
   const { canViewPayment, canViewTeam, canViewSupport } = usePermission();
   const handleLogout = useLogout();
+  const user = useAuthStore((state) => state.user);
 
   return (
     <Sidebar variant="sidebar" collapsible="icon" className="group/sidebar">
@@ -100,7 +103,6 @@ export function AdminSidebar() {
                 href="/admin/ranking"
                 collapsed={collapsed}
               />
-
               {canViewSupport && (
                 <SidebarItem
                   icon={<Headset size={20} />}
@@ -109,6 +111,12 @@ export function AdminSidebar() {
                   collapsed={collapsed}
                 />
               )}
+              <SidebarItem
+                icon={<Settings size={20} />}
+                label="Configurações"
+                href="/admin/config"
+                collapsed={collapsed}
+              />
             </SidebarMenu>
           </SidebarGroup>
         </SidebarContent>
@@ -120,15 +128,16 @@ export function AdminSidebar() {
               <div className="w-8 h-8 bg-muted rounded-full" />
               {!collapsed && (
                 <div>
-                  <div className="text-sm font-medium">Fulano da Silva</div>
-                  <div className="text-xs text-muted-foreground">CUPOM123</div>
+                  <div className="text-sm font-medium">
+                    {user?.fullName || 'Usuário'}
+                  </div>
                 </div>
               )}
             </div>
 
             <Button
               variant="destructive"
-              size={collapsed ? "icon" : "default"}
+              size={collapsed ? 'icon' : 'default'}
               className="w-full mt-2"
               onClick={handleLogout}
             >
@@ -163,8 +172,8 @@ function SidebarItem({
           href={href}
           className={`flex items-center gap-2 px-3 py-5 rounded-sm text-sm transition-colors ${
             isActive
-              ? "bg-accent text-accent-foreground font-medium"
-              : "hover:bg-muted"
+              ? 'bg-accent text-accent-foreground font-medium'
+              : 'hover:bg-muted'
           }`}
         >
           {icon}

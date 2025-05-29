@@ -8,10 +8,13 @@ import { AffiliateSidebar } from '@/components/common/AffilliateSidebar/Affillia
 import { Header } from '@/components/common/Header/Header';
 import { SidebarProvider } from '@/components/ui/sidebar';
 import { useAuthStore } from '@/store/authStore';
+import { useSessionValidator } from '@/hooks/useSessionValidator';
 
 export default function AfiliadoLayout({ children }: { children: ReactNode }) {
   const { allowed, isVerifying } = useRoleGuard('USER');
   const user = useAuthStore(state => state.user);
+
+  useSessionValidator();
   
   // Log para depuração
   useEffect(() => {

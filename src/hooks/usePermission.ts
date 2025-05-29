@@ -1,12 +1,32 @@
-'use client';
-
 import { useAuthStore } from '@/store/authStore';
 
 export function usePermission() {
   const user = useAuthStore((state) => state.user);
 
   const privileges = user?.roleAccess?.privileges;
+  
+  console.log('User privileges:', user?.role, privileges);
+  
+  // Para usuários ADMIN, conceder todos os privilégios automaticamente
+  if (user?.role === 'ADMIN') {
+    return {
+      // Equipe
+      canCreateTeam: true,
+      canEditTeam: true,
+      canViewTeam: true,
 
+      // Pagamentos
+      canCreatePayment: true,
+      canEditPayment: true,
+      canViewPayment: true,
+
+      // Suporte
+      canCreateSupport: true,
+      canEditSupport: true,
+      canViewSupport: true,
+    };
+  }
+  
   return {
     // Equipe
     canCreateTeam: !!privileges?.teamPrivilege?.teamCreate,

@@ -15,9 +15,9 @@ export default function LoginPage() {
   if (!ready) return <LoadingAnimation />;
 
   return (
-    <div className="flex w-full min-h-screen items-center justify-center bg-primary">
+    <div className="flex w-full min-h-screen items-center bg-muted justify-center">
       <div className="w-full flex items-center justify-center lg:w-1/3">
-        <Card className="w-full max-w-md shadow-none border-none bg-primary">
+        <Card className="w-full max-w-md shadow-none border-none bg-muted">
           <Image src={Logo} alt="OBER shop" className="w-28 mx-auto mb-3" />
           <CardHeader>
             <CardTitle className="text-center text-2xl text-secondary">Login</CardTitle>

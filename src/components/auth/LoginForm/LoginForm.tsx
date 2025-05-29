@@ -40,21 +40,18 @@ export function LoginForm() {
       onSuccess: async (data) => {
         try {
           const user = await validateSessionId(data.sessionId);
-          
-          // Armazenar dados do usuário e sessionId
+
+          // Salva em Zustand
           setSessionId(data.sessionId);
           setUser(user);
 
-          // Verificar se o usuário tem um papel válido antes de redirecionar
-          if (!user || !user.role) {
-            throw new Error('Dados de usuário inválidos');
-          }
+          // Salva também no cookie (para o middleware.ts funcionar)
+          document.cookie = `session-id=${data.sessionId}; path=/; SameSite=Lax`;
 
-          // Redirecionar com base no papel do usuário
+          if (!user || !user.role)
+            throw new Error('Dados de usuário inválidos');
+
           const path = user.role === 'ADMIN' ? '/admin/home' : '/afiliado/home';
-          console.log('Redirecionando para:', path, 'Papel:', user.role);
-          
-          // Usar setTimeout para garantir que o estado seja atualizado antes do redirecionamento
           setTimeout(() => {
             router.push(path);
             setLoading(false);

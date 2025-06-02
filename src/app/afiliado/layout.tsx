@@ -9,20 +9,23 @@ import { Header } from '@/components/common/Header/Header';
 import { SidebarProvider } from '@/components/ui/sidebar';
 import { useAuthStore } from '@/store/authStore';
 import { useSessionValidator } from '@/hooks/useSessionValidator';
+import { useAffiliateData } from '@/hooks/useAffiliateData';
 
 export default function AfiliadoLayout({ children }: { children: ReactNode }) {
   const { allowed, isVerifying } = useRoleGuard('USER');
   const user = useAuthStore(state => state.user);
+  const { data: affiliateData, isLoading } = useAffiliateData();
 
   useSessionValidator();
   
   // Log para depuração
   useEffect(() => {
     console.log('AfiliadoLayout: Renderizando com usuário:', user);
-  }, [user]);
+    console.log('AfiliadoLayout: Dados do afiliado:', affiliateData);
+  }, [user, affiliateData]);
 
-  if (isVerifying) {
-    console.log('AfiliadoLayout: Verificando permissões...');
+  if (isVerifying || isLoading) {
+    console.log('AfiliadoLayout: Verificando permissões ou carregando dados...');
     return <LoadingAnimation />;
   }
   

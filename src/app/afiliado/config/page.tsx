@@ -265,7 +265,7 @@ export default function ConfigPage() {
   };
 
   return (
-    <div className="container mx-auto py-6 space-y-6">
+    <div className="container mx-auto py-6 space-y-6 w-[90%]">
       <Card>
         <CardHeader>
           <CardTitle className="text-2xl flex items-center gap-2">

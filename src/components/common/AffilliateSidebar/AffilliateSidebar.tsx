@@ -63,7 +63,7 @@ export function AffiliateSidebar() {
             <SidebarMenu className="w-full py-4 gap-4">
               <SidebarItem icon={<Home size={20} />} label="Início" href="/afiliado/home" collapsed={collapsed} />
               <SidebarItem icon={<HandCoins size={20} />} label="Vendas" href="/afiliado/vendas" collapsed={collapsed} />
-              <SidebarItem icon={<FileText size={20} />} label="Extrato" href="/afiliado/extrato" collapsed={collapsed} />
+              {/* <SidebarItem icon={<FileText size={20} />} label="Extrato" href="/afiliado/extrato" collapsed={collapsed} /> */}
               <SidebarItem icon={<CreditCard size={20} />} label="Pagamentos" href="/afiliado/pagamentos" collapsed={collapsed} />
               <SidebarItem icon={<Users size={20} />} label="Minha Equipe" href="/afiliado/equipe" collapsed={collapsed} />
               {/* <SidebarItem icon={<BarChart size={20} />} label="Ranking" href="/afiliado/ranking" collapsed={collapsed} /> */}

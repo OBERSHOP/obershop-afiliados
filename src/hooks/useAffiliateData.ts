@@ -7,8 +7,8 @@ import { api } from '@/lib/api';
 
 export function useAffiliateData() {
   const sessionId = useAuthStore((s) => s.sessionId);
-const influencerData = useInfluencerStore((s) => s.influencer);
-const setInfluencerData = useInfluencerStore((s) => s.setInfluencer);
+  const influencerData = useInfluencerStore((s) => s.influencer);
+  const setInfluencerData = useInfluencerStore((s) => s.setInfluencer);
 
   return useQuery({
     queryKey: ['affiliate-data'],
@@ -20,6 +20,11 @@ const setInfluencerData = useInfluencerStore((s) => s.setInfluencer);
       });
 
       const newData = response.data;
+
+      // Preserva o profilePicture se já existir no store e não vier da API
+      if (newData && influencerData?.profilePicture && !newData.profilePicture) {
+        newData.profilePicture = influencerData.profilePicture;
+      }
 
       if (JSON.stringify(influencerData) !== JSON.stringify(newData)) {
         setInfluencerData(newData);

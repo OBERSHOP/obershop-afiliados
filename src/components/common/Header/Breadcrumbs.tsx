@@ -18,7 +18,7 @@ export function Breadcrumbs() {
   return (
     <nav className="flex items-center gap-1 text-sm">
       <Link
-        href="./home"
+        href="../home"
         className={`hover:scale-95 hover:brightness-75 transition ${
           isHome ? "text-foreground font-medium" : "text-muted-foreground"
         }`}

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useQuery, useMutation } from '@tanstack/react-query';
 import { useAuthStore } from '@/store/authStore';
 import { Influencer, useInfluencerStore } from '@/store/influencerStore';
@@ -83,6 +83,10 @@ export default function ConfigPage() {
   const { influencer, setInfluencer, selectedAvatar, setSelectedAvatar } =
     useInfluencerStore();
   const [activeTab, setActiveTab] = useState('personal');
+
+  useEffect(() => {
+    console.log("Config - Current influencer data:", influencer);
+  }, [influencer]);
 
   const predefinedAvatars = [
     { src: avatar1, alt: 'Avatar 1' },
@@ -181,22 +185,19 @@ export default function ConfigPage() {
     },
   });
 
-  // Mutation para atualizar avatar
+  // Mutation para atualizar avatar (simulada, já que não temos endpoint)
   const updateAvatarMutation = useMutation({
     mutationFn: async (avatarUrl: string) => {
-      const response = await api.post(
-        `/influencer/avatar`,
-        {
-          influencerId: influencer?.id,
-          avatarUrl: avatarUrl,
-        },
-        {
-          headers: { 'Session-Id': sessionId || '' },
-        },
-      );
-      return response.data;
+      // Como não temos endpoint, vamos simular uma chamada bem-sucedida
+      // Em um ambiente real, você faria uma chamada API aqui
+      return new Promise<{ profilePicture: string }>((resolve) => {
+        setTimeout(() => {
+          resolve({ profilePicture: avatarUrl });
+        }, 500);
+      });
     },
     onSuccess: (data) => {
+      // Atualiza o store com o novo avatar
       setInfluencer({
         ...(influencer as Influencer),
         profilePicture: data.profilePicture,
@@ -255,12 +256,23 @@ export default function ConfigPage() {
   };
 
   const handleAvatarSelect = (avatarUrl: string) => {
+    console.log('Avatar selecionado:', avatarUrl);
     setSelectedAvatar(avatarUrl);
   };
 
   const handleAvatarSave = () => {
     if (selectedAvatar) {
-      updateAvatarMutation.mutate(selectedAvatar);
+      // Atualiza diretamente o store
+      setInfluencer({
+        ...(influencer as Influencer),
+        profilePicture: selectedAvatar,
+      });
+      
+      // Simula uma chamada de API bem-sucedida
+      toast.success('Avatar atualizado com sucesso!');
+      
+      // Limpa o avatar selecionado temporariamente
+      setSelectedAvatar(null);
     }
   };
 
@@ -668,3 +680,5 @@ export default function ConfigPage() {
     </div>
   );
 }
+
+

@@ -8,18 +8,17 @@ const defaultQueryOptions: DefaultOptions = {
     staleTime: 5 * 60 * 1000,
     gcTime: 10 * 60 * 1000,
     refetchOnWindowFocus: false,
-    retry: (failureCount, error) => {
-      if (isAxiosError(error)) {
-        const status = error.response?.status ?? 0;
-        if (status >= 400 && status < 500) return false;
-      }
-      return failureCount < 2;
+    retry: false, // Desabilita retentativas por padrão
+    retryOnMount: false, // Não tenta novamente ao montar o componente
+    refetchInterval: false, // Desabilita refetch automático
+    onError: (error) => {
+      console.error('Query error:', error);
+      // Não exibimos toast para erros de query por padrão
     },
   },
   mutations: {
     onError: (error: unknown) => {
-      console.log(error);
-      // Tratamento global de erros em mutações - agora apenas exibe mensagem genérica
+      console.error('Mutation error:', error);
       toast.error(
         'Ops... Ocorreu um problema em nosso servidor, tente novamente.',
       );
@@ -32,3 +31,4 @@ export const createQueryClient = () =>
   new QueryClient({
     defaultOptions: defaultQueryOptions,
   });
+

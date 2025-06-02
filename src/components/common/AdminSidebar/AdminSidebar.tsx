@@ -30,6 +30,9 @@ import { usePermission } from '@/hooks/usePermission';
 import { useLogout } from '@/hooks/useLogout';
 import { Button } from '@/components/ui/button';
 import { useAuthStore } from '@/store/authStore';
+import { useInfluencerStore } from '@/store/influencerStore';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { useEffect } from 'react';
 
 export function AdminSidebar() {
   const { state, setOpenMobile } = useSidebar();
@@ -37,6 +40,22 @@ export function AdminSidebar() {
   const { canViewPayment, canViewTeam, canViewSupport } = usePermission();
   const handleLogout = useLogout();
   const user = useAuthStore((state) => state.user);
+  const { influencer } = useInfluencerStore();
+
+  // Função para obter iniciais do nome
+  const getInitials = (name: string) => {
+    return name
+      .split(' ')
+      .map((part) => part.charAt(0))
+      .join('')
+      .toUpperCase()
+      .substring(0, 2);
+  };
+
+  // Função para depuração
+  useEffect(() => {
+    console.log("AdminSidebar - Influencer data:", influencer);
+  }, [influencer]);
 
   return (
     <Sidebar variant="sidebar" collapsible="icon" className="group/sidebar">
@@ -48,7 +67,7 @@ export function AdminSidebar() {
             {!collapsed && (
               <div className="flex flex-col w-full">
                 <span className="text-lg font-bold">OBERSHOP</span>
-                <span className="text-muted-foreground text-sm">Afiliado</span>
+                <span className="text-muted-foreground text-sm">Admin</span>
               </div>
             )}
             <button
@@ -125,7 +144,18 @@ export function AdminSidebar() {
         <SidebarFooter className="border-t px-4 py-3">
           <div className="flex flex-col gap-3">
             <div className="flex items-center gap-3">
-              <div className="w-8 h-8 bg-muted rounded-full" />
+              <Avatar className="w-8 h-8">
+                {influencer?.profilePicture ? (
+                  <AvatarImage 
+                    src={influencer.profilePicture} 
+                    alt={user?.fullName || 'Usuário'} 
+                  />
+                ) : (
+                  <AvatarFallback>
+                    {getInitials(user?.fullName || 'Usuário')}
+                  </AvatarFallback>
+                )}
+              </Avatar>
               {!collapsed && (
                 <div>
                   <div className="text-sm font-medium">

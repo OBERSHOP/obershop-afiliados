@@ -18,7 +18,6 @@ import {
   X,
   LogOut,
   CreditCard,
-  FileText,
   Settings,
 } from 'lucide-react';
 import Image from 'next/image';
@@ -28,12 +27,31 @@ import { usePathname } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { useLogout } from '@/hooks/useLogout';
 import { useAuthStore } from '@/store/authStore';
+import { useInfluencerStore } from '@/store/influencerStore';
+import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
+import { useEffect } from 'react';
 
 export function AffiliateSidebar() {
   const { state, setOpenMobile } = useSidebar();
   const collapsed = state === 'collapsed';
   const handleLogout = useLogout();
   const user = useAuthStore((state) => state.user);
+  const { influencer } = useInfluencerStore();
+
+  // Função para obter iniciais do nome
+  const getInitials = (name: string) => {
+    return name
+      .split(' ')
+      .map((part) => part.charAt(0))
+      .join('')
+      .toUpperCase()
+      .substring(0, 2);
+  };
+
+  // Função para depuração
+  useEffect(() => {
+    console.log("Sidebar - Influencer data:", influencer);
+  }, [influencer]);
 
   return (
     <Sidebar variant="sidebar" collapsible="icon" className="group/sidebar">
@@ -77,7 +95,18 @@ export function AffiliateSidebar() {
         <SidebarFooter className="border-t px-4 py-3">
           <div className="flex flex-col gap-3">
             <div className="flex items-center gap-3">
-              <div className="w-8 h-8 bg-muted rounded-full" />
+              <Avatar className="w-8 h-8">
+                {influencer?.profilePicture ? (
+                  <AvatarImage 
+                    src={influencer.profilePicture} 
+                    alt={user?.fullName || 'Usuário'} 
+                  />
+                ) : (
+                  <AvatarFallback>
+                    {getInitials(user?.fullName || 'Usuário')}
+                  </AvatarFallback>
+                )}
+              </Avatar>
               {!collapsed && (
                 <div>
                   <div className="text-sm font-medium">{user?.fullName || 'Usuário'}</div>

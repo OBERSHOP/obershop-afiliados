@@ -6,37 +6,57 @@ export interface Influencer {
   id: string;
   fullName: string;
   email: string;
-  phone: string;
-  profilePicture?: string;
-  cpf?: string;
+  cpf: string;
   cnpj?: string;
+  phone?: string;
   cep?: string;
   state?: string;
   city?: string;
   neighborhood?: string;
   streetAddress?: string;
   numberAddress?: string;
+  profilePicture?: string;
+  codeCoupon?: string;
+  leader?: string;
+  createdAt?: string;
+  updatedAt?: string;
 }
 
-interface InfluencerStore {
+interface InfluencerState {
   influencer: Influencer | null;
   selectedAvatar: string | null;
-  setInfluencer: (data: Influencer) => void;
-  setSelectedAvatar: (avatar: string) => void;
+  setInfluencer: (influencer: Influencer | null) => void;
+  setSelectedAvatar: (avatar: string | null) => void;
+  updateProfilePicture: (avatarUrl: string) => void;
   clearInfluencer: () => void;
 }
 
-export const useInfluencerStore = create<InfluencerStore>()(
+export const useInfluencerStore = create<InfluencerState>()(
   persist(
-    (set) => ({
+    (set, get) => ({
       influencer: null,
       selectedAvatar: null,
-      setInfluencer: (data) => set({ influencer: data }),
+      setInfluencer: (influencer) => set({ influencer }),
       setSelectedAvatar: (avatar) => set({ selectedAvatar: avatar }),
-      clearInfluencer: () => set({ influencer: null }),
+      updateProfilePicture: (avatarUrl) => {
+        const currentInfluencer = get().influencer;
+        if (currentInfluencer) {
+          set({
+            influencer: {
+              ...currentInfluencer,
+              profilePicture: avatarUrl
+            }
+          });
+        }
+      },
+      clearInfluencer: () => set({ influencer: null, selectedAvatar: null }),
     }),
     {
       name: 'influencer-storage',
-    },
-  ),
+      partialize: (state) => ({
+        influencer: state.influencer,
+        selectedAvatar: state.selectedAvatar,
+      }),
+    }
+  )
 );

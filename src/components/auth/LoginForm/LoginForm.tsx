@@ -79,7 +79,7 @@ export function LoginForm() {
         <div className="flex items-center justify-center">
           <Input
             placeholder="Digite seu e-mail"
-            className="bg-background py-5 w-full"
+            className="bg-background py-5 w-full text-white"
             {...register('email')}
             onChange={(e) => {
               const value = e.target.value.replace(/['"%;<>!?]/g, '');
@@ -97,7 +97,7 @@ export function LoginForm() {
           <Input
             placeholder="Digite sua senha"
             type={showPassword ? 'text' : 'password'}
-            className="bg-background py-5 pr-10"
+            className="bg-background py-5 pr-10 text-white"
             {...register('password')}
           />
           <button

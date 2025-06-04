@@ -7,17 +7,17 @@ import logoImg from '@/../public/favicon.ico';
 import { z } from 'zod';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { 
-  Form, 
-  FormControl, 
-  FormField, 
-  FormItem, 
-  FormLabel, 
-  FormMessage 
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import { useRouter, useSearchParams } from 'next/navigation';
+import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import '@/app/globals.css';
 import { apiClient } from '@/lib/apiHandler';
@@ -183,12 +183,16 @@ export default function Cadastro() {
   const [success, setSuccess] = useState(false);
   const [isFetchingCep, setIsFetchingCep] = useState(false);
   const router = useRouter();
-  const searchParams = useSearchParams();
   const steps = [1, 2, 3];
-  
+  const [sessionId, setSessionId] = useState<string | null>(null);
+
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    setSessionId(params.get('sessionId'));
+  }, []);
+
   // Extrair apenas o sessionId da URL
-  const sessionId = searchParams.get('sessionId');
-  
+
   // Inicializar o formulário com react-hook-form e zod
   const form = useForm<CadastroForm>({
     resolver: zodResolver(cadastroSchema),
@@ -210,59 +214,67 @@ export default function Cadastro() {
     },
     mode: 'onChange',
   });
-  
+
   // Obter o valor atual do CEP do formulário
   const cepValue = form.watch('cep');
-  
+
   // Aplicar debounce ao valor do CEP
   const [debouncedCep] = useDebounce(cepValue, 800);
-  
+
   // Função para buscar endereço pelo CEP usando Brasil API
-  const fetchAddressByCep = useCallback(async (cep: string): Promise<void> => {
-    if (!cep || cep.length < 9) {
-      setIsFetchingCep(false);
-      return; // CEP incompleto (formato: 00000-000)
-    }
-    
-    try {
-      // Não definimos setIsFetchingCep(true) aqui, pois já foi definido no useEffect
-      
-      // Remover caracteres não numéricos para a consulta
-      const cleanCep = cep.replace(/\D/g, '');
-      
-      // Usar a API pública do Brasil API
-      const response = await fetch(`https://brasilapi.com.br/api/cep/v1/${cleanCep}`);
-      
-      if (!response.ok) {
-        throw new Error('CEP não encontrado');
+  const fetchAddressByCep = useCallback(
+    async (cep: string): Promise<void> => {
+      if (!cep || cep.length < 9) {
+        setIsFetchingCep(false);
+        return; // CEP incompleto (formato: 00000-000)
       }
-      
-      const data: CepResponse = await response.json();
-      
-      // Preencher os campos de endereço com os dados retornados apenas se estiverem vazios
-      const currentState = form.getValues('state');
-      const currentCity = form.getValues('city');
-      const currentNeighborhood = form.getValues('neighborhood');
-      const currentStreetAddress = form.getValues('streetAddress');
-      
-      if (!currentState) form.setValue('state', data.state);
-      if (!currentCity) form.setValue('city', data.city);
-      if (!currentNeighborhood) form.setValue('neighborhood', data.neighborhood || '');
-      if (!currentStreetAddress) form.setValue('streetAddress', data.street || '');
-      
-      // Trigger validation apenas para os campos que foram preenchidos
-      form.trigger(['state', 'city', 'neighborhood', 'streetAddress']);
-    } catch (err: unknown) {
-      console.error('Erro ao buscar CEP:', err);
-      // Não exibimos erro para o usuário para não interromper o fluxo
-    } finally {
-      setIsFetchingCep(false);
-    }
-  }, [form]); // Dependência: form
-  
+
+      try {
+        // Não definimos setIsFetchingCep(true) aqui, pois já foi definido no useEffect
+
+        // Remover caracteres não numéricos para a consulta
+        const cleanCep = cep.replace(/\D/g, '');
+
+        // Usar a API pública do Brasil API
+        const response = await fetch(
+          `https://brasilapi.com.br/api/cep/v1/${cleanCep}`,
+        );
+
+        if (!response.ok) {
+          throw new Error('CEP não encontrado');
+        }
+
+        const data: CepResponse = await response.json();
+
+        // Preencher os campos de endereço com os dados retornados apenas se estiverem vazios
+        const currentState = form.getValues('state');
+        const currentCity = form.getValues('city');
+        const currentNeighborhood = form.getValues('neighborhood');
+        const currentStreetAddress = form.getValues('streetAddress');
+
+        if (!currentState) form.setValue('state', data.state);
+        if (!currentCity) form.setValue('city', data.city);
+        if (!currentNeighborhood)
+          form.setValue('neighborhood', data.neighborhood || '');
+        if (!currentStreetAddress)
+          form.setValue('streetAddress', data.street || '');
+
+        // Trigger validation apenas para os campos que foram preenchidos
+        form.trigger(['state', 'city', 'neighborhood', 'streetAddress']);
+      } catch (err: unknown) {
+        console.error('Erro ao buscar CEP:', err);
+        // Não exibimos erro para o usuário para não interromper o fluxo
+      } finally {
+        setIsFetchingCep(false);
+      }
+    },
+    [form],
+  ); // Dependência: form
+
   // Efeito para buscar o endereço quando o CEP debounced mudar
   useEffect(() => {
-    if (debouncedCep && debouncedCep.length === 9) { // Formato: 00000-000
+    if (debouncedCep && debouncedCep.length === 9) {
+      // Formato: 00000-000
       // Ativar o skeleton imediatamente quando o CEP estiver completo
       setIsFetchingCep(true);
       fetchAddressByCep(debouncedCep);
@@ -323,17 +335,20 @@ export default function Cadastro() {
       }, 2000);
     } catch (err: unknown) {
       console.error('Erro ao cadastrar:', err);
-      
+
       // Tipagem mais específica para o erro
       if (err && typeof err === 'object' && 'response' in err) {
-        const apiError = err as { 
-          response?: { 
-            data?: { 
-              message?: string 
-            } 
-          } 
+        const apiError = err as {
+          response?: {
+            data?: {
+              message?: string;
+            };
+          };
         };
-        setError(apiError.response?.data?.message || 'Erro ao realizar cadastro. Tente novamente.');
+        setError(
+          apiError.response?.data?.message ||
+            'Erro ao realizar cadastro. Tente novamente.',
+        );
       } else {
         setError('Erro ao realizar cadastro. Tente novamente.');
       }

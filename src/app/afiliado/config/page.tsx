@@ -42,6 +42,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { User, Settings, Key, Upload, Save } from 'lucide-react';
 import { api } from '@/lib/api';
+import { apiClient } from '@/lib/apiHandler';
 
 // Schemas de validação
 const personalDataSchema = z.object({
@@ -130,7 +131,7 @@ export default function ConfigPage() {
   const { isLoading, isError, refetch } = useQuery({
     queryKey: ['influencer-data'],
     queryFn: async () => {
-      const response = await api.get(`/influencer/${influencer?.id}`, {
+      const response = await apiClient.get(`/influencer`, {
         headers: { 'Session-Id': sessionId || '' },
       });
 

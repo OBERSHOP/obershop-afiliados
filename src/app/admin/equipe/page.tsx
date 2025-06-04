@@ -51,7 +51,6 @@ import {
   FormMessage,
 } from '@/components/ui/form';
 import { toast } from 'sonner';
-import { api } from '@/lib/api';
 import axios from 'axios';
 import { apiClient } from '@/lib/apiHandler';
 
@@ -257,7 +256,7 @@ export default function EquipePage() {
   // Mutação para adicionar influencer
   const addInfluencerMutation = useMutation({
     mutationFn: async (data: AddInfluencerFormValues) => {
-      const response = await api.post('/influencer', data, {
+      const response = await apiClient.post('/influencer', data, {
         headers: {
           'Session-Id': sessionId || '',
         },

@@ -26,6 +26,7 @@ export interface Privileges {
 export interface User {
   id?: string;
   fullName: string;
+  email?: string; // Adicionando email como propriedade opcional
   role: UserRole;
   roleAccess?: {
     id: string;
@@ -38,6 +39,7 @@ interface AuthState {
   sessionId: string | null;
   user: User | null;
   hasHydrated: boolean;
+  email?: string
 }
 
 interface AuthActions {

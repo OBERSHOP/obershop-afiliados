@@ -1,34 +1,39 @@
-import { QueryClient, DefaultOptions } from '@tanstack/react-query';
-import { isAxiosError } from 'axios';
+import { QueryClient, QueryCache, MutationCache } from '@tanstack/react-query';
 import { toast } from 'sonner';
 
-// Configurações padrão para todas as queries
-const defaultQueryOptions: DefaultOptions = {
-  queries: {
-    staleTime: 5 * 60 * 1000,
-    gcTime: 10 * 60 * 1000,
-    refetchOnWindowFocus: false,
-    retry: false, // Desabilita retentativas por padrão
-    retryOnMount: false, // Não tenta novamente ao montar o componente
-    refetchInterval: false, // Desabilita refetch automático
+// Factory function para criar um QueryClient com configurações consistentes
+export const createQueryClient = () => {
+  // Criar cache para queries com handler de erro global
+  const queryCache = new QueryCache({
     onError: (error) => {
       console.error('Query error:', error);
       // Não exibimos toast para erros de query por padrão
     },
-  },
-  mutations: {
-    onError: (error: unknown) => {
+  });
+
+  // Criar cache para mutations com handler de erro global
+  const mutationCache = new MutationCache({
+    onError: (error) => {
       console.error('Mutation error:', error);
       toast.error(
         'Ops... Ocorreu um problema em nosso servidor, tente novamente.',
       );
     },
-  },
-};
-
-// Factory function para criar um QueryClient com configurações consistentes
-export const createQueryClient = () =>
-  new QueryClient({
-    defaultOptions: defaultQueryOptions,
   });
+
+  return new QueryClient({
+    queryCache,
+    mutationCache,
+    defaultOptions: {
+      queries: {
+        staleTime: 5 * 60 * 1000,
+        gcTime: 10 * 60 * 1000,
+        refetchOnWindowFocus: false,
+        retry: false, // Desabilita retentativas por padrão
+        retryOnMount: false, // Não tenta novamente ao montar o componente
+        refetchInterval: false, // Desabilita refetch automático
+      },
+    },
+  });
+};
 

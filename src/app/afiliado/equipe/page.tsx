@@ -100,8 +100,10 @@ export default function EquipePage() {
   } = useQuery<TeamData>({
     queryKey: ['team-data', influencer?.id],
     queryFn: async () => {
-      const response = await apiClient.get('/team', {
-        params: { influencerId: influencer?.id },
+      const response = await apiClient.get('/influencer/paged', {
+        headers: {
+          'Session-Id': sessionId || '',
+        },  
       });
       return response.data;
     },

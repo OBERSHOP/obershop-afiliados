@@ -176,6 +176,10 @@ input{
   color: var(--text);
 }
 
+form input{
+  color: black;
+}
+
 body {
   font-family: var(--font-primary), Arial, Helvetica, sans-serif;
 }

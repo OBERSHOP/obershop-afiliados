@@ -53,6 +53,7 @@ import {
 import { toast } from 'sonner';
 import { api } from '@/lib/api';
 import axios from 'axios';
+import { apiClient } from '@/lib/apiHandler';
 
 // Definição de tipos
 interface Influencer {
@@ -162,7 +163,7 @@ export default function EquipePage() {
       searchBy,
     ],
     queryFn: async () => {
-      const response = await api.get('/influencer/paged', {
+      const response = await apiClient.get('/influencer/paged', {
         headers: {
           'Session-Id': sessionId || '',
         },
@@ -214,7 +215,7 @@ export default function EquipePage() {
   const inviteMutation = useMutation({
     mutationFn: async (data: InviteFormValues) => {
       try {
-        const response = await api.post('/influencer/pre-register', data, {
+        const response = await apiClient.post('/influencer/pre-register', data, {
           headers: {
             'Session-Id': sessionId || '',
           },

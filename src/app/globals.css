@@ -165,6 +165,10 @@
   --sidebar-ring: oklch(0.556 0 0);
 }
 
+:where(a, button){
+  cursor: pointer;
+}
+
 body {
   font-family: var(--font-primary), Arial, Helvetica, sans-serif;
 }
@@ -326,10 +330,4 @@ body {
   position: absolute;
   box-sizing: content-box;
   border: 4
-}
-
-.backgroundCadastro{
-  background-image: url('/image/bg-cadastro.webp');
-  background-repeat: no-repeat;
-  background-size: cover;
 }

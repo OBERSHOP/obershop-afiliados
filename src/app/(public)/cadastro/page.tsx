@@ -185,10 +185,12 @@ export default function Cadastro() {
   const router = useRouter();
   const steps = [1, 2, 3];
   const [sessionId, setSessionId] = useState<string | null>(null);
+  const [influencerId, setInfluencerId] = useState<string | null>(null);
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     setSessionId(params.get('sessionId'));
+    setInfluencerId(params.get('influencerId'));
   }, []);
 
   // Extrair apenas o sessionId da URL
@@ -325,9 +327,15 @@ export default function Cadastro() {
         headers['Session-Id'] = sessionId;
       }
 
-      await apiClient.post('/influencer/finalized-register', sanitizedData, {
-        headers,
-      });
+      await apiClient.post(
+        `/influencer/finalized-register/${influencerId}`,
+        {
+          ...sanitizedData,
+        },
+        {
+          headers,
+        },
+      );
 
       setSuccess(true);
       setTimeout(() => {

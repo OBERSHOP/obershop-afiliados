@@ -103,9 +103,65 @@ export default function EquipePage() {
       const response = await apiClient.get('/influencer/paged', {
         headers: {
           'Session-Id': sessionId || '',
-        },  
+        },
+        params: {
+          itemsPerPage: 10,
+          pageIndex: 1,
+          orderBy: 'name+asc',
+          search: '', 
+          searchBy: ['leader']  
+        }
       });
-      return response.data;
+      
+      const paginatedData = response.data as {
+        content: Array<{
+          id: string;
+          fullName: string;
+          email: string;
+          phone: string;
+          codeCoupon: string;
+          active: boolean;
+          entryDate: string;
+          leader: string | null;
+          leaderName: string | null;
+        }>;
+      };
+      
+      const result: TeamData = {
+        leader: null,
+        currentUser: {} as TeamMember,
+        members: []
+      };
+      
+      if (paginatedData.content && Array.isArray(paginatedData.content)) {
+        paginatedData.content.forEach((member) => {
+          const teamMember: TeamMember = {
+            id: member.id,
+            fullName: member.fullName,
+            email: member.email,
+            phone: member.phone || '',
+            codeCoupon: member.codeCoupon,
+            active: member.active,
+            entryDate: member.entryDate,
+            leaderId: member.leader,
+            leaderName: member.leaderName,
+            totalSales: 0, // Esses dados podem não estar disponíveis na API
+            totalCommission: 0 // Esses dados podem não estar disponíveis na API
+          };
+          
+          // Identificar o usuário atual e o líder
+          if (member.id === influencer?.id) {
+            result.currentUser = teamMember;
+          } else if (member.id === influencer?.leader) {
+            result.leader = teamMember;
+          } else if (member.leader === influencer?.id) {
+            // Este é um membro da equipe do usuário atual
+            result.members.push(teamMember);
+          }
+        });
+      }
+      
+      return result;
     },
     enabled: !!sessionId && !!influencer?.id,
     staleTime: 1000 * 60 * 5,
@@ -113,11 +169,8 @@ export default function EquipePage() {
 
   const inviteMutation = useMutation({
     mutationFn: async (data: InviteFormValues) => {
-      const payload = {
-        ...data,
-        leader: sessionId,
-      };
-      const response = await apiClient.post('/influencer/pre-register', payload, {
+      // Removendo o leader do payload
+      const response = await apiClient.post('/influencer/pre-register', data, {
         headers: {
           'Session-Id': sessionId || '',
         },  
@@ -223,7 +276,7 @@ export default function EquipePage() {
             <div>
               <p className="text-sm text-muted-foreground">Comissão</p>
               <p className="font-medium text-green-600">
-                R$ {member.totalCommission.toFixed(2)}
+                R$ {(Number(member.totalCommission) || 0).toFixed(2)}
               </p>
             </div>
           </div>

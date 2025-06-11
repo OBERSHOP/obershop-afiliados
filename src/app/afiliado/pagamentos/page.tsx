@@ -125,7 +125,7 @@ export default function PagamentosPage() {
   };
 
   return (
-    <div className="container mx-auto py-6 space-y-6">
+    <div className="container mx-auto py-6 px-4 space-y-6">
       <Card className="max-w-2xl mx-auto">
         <CardHeader>
           <CardTitle className="text-2xl flex items-center gap-2">
@@ -220,7 +220,7 @@ export default function PagamentosPage() {
                         </span>
                         <Input
                           {...field}
-                          className="pl-8"
+                          className="pl-8 text-white!"
                           placeholder="0,00"
                           inputMode="numeric"
                           onChange={(e) => {

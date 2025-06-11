@@ -387,7 +387,7 @@ export default function Cadastro() {
           <h2 className="text-2xl font-bold text-gray-800 text-center mb-6">
             Cadastro de Afiliado OberShop
           </h2>
-          <div className="overflow-y-auto w-full py-4 px-8 max-h-[60dvh]">
+          <div className="lg:overflow-y-auto overflow-scroll-hidden w-full py-4 px-4 max-h-[60dvh]">
             {error && (
               <div
                 className="bg-red-50 border border-red-200 text-red-600 p-3 rounded-lg text-center mb-4 w-full"
@@ -815,7 +815,7 @@ export default function Cadastro() {
                   </div>
                 )}
 
-                <div className="flex justify-between pt-4">
+                <div className="flex justify-between">
                   {currentStep > 1 && (
                     <Button
                       type="button"
@@ -852,7 +852,7 @@ export default function Cadastro() {
             </Form>
           </div>
 
-          <div className="mt-6 text-center text-sm text-gray-600">
+          <div className="pt-10 text-center text-sm text-gray-600">
             Já possui uma conta?{' '}
             <Link
               href="/login"

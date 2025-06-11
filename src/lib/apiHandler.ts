@@ -20,7 +20,7 @@ function customParamsSerializer(
     }
   });
 
-  return searchParams.toString().replace(/%2B/g, "+");
+  return searchParams.toString();
 }
 
 export const apiClient = axios.create({
